@@ -3,8 +3,8 @@ name: Deploy Infrastructure
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - main        # automatically run on pushes to main
+  workflow_dispatch:  # keep manual trigger
     inputs:
       environment:
         type: choice
