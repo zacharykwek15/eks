@@ -1,15 +1,17 @@
 name: Deploy Infrastructure
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       environment:
         type: choice
         description: Select the environment
         options:
-        - dev
-        - uat
-        - prod
+          - dev
+
 
 permissions:
   id-token: write
