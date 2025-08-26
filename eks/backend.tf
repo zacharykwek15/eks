@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "sctp-ce10-tfstate"
-    key    = "zh/eks.tfstate"
+    key    = "zh-test/eks.tfstate"
     region = "ap-southeast-1"
   }
 
