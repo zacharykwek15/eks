@@ -55,15 +55,6 @@ jobs:
         run: |
           echo "VPC_ID=$(terraform output -raw vpc_id)" >> $GITHUB_ENV
 
-      - name: Deploy ECR
-        working-directory: ./ecr
-        run: |
-          terraform init
-          terraform workspace select -or-create ${{ github.event.inputs.environment }}
-          terraform workspace list
-          terraform validate
-          terraform plan
-          terraform apply --auto-approve
 
       - name: Deploy EKS
         working-directory: ./eks
