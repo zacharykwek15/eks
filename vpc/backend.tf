@@ -4,6 +4,7 @@ terraform {
     key    = "zh-test/vpc.tfstate"
     region = "ap-southeast-1"
   }
+  
 
   required_version = ">= 1.0.0"
 }
