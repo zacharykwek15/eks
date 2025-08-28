@@ -94,31 +94,53 @@ jobs:
         run: kubectl delete storageclass gp2
         continue-on-error: true
 
+
       - name: Update aws-auth ConfigMap with IAM User ARNs
         run: |
-          set -x  # Enable shell debugging
+          set -euxo pipeline    @safer debugging
+          # Pull the IAM ARN from GitHub Secrets
+          MY_ARN="${AWS_IAM_ROLE}"
 
-          # Convert the environment variable to an array
-          IFS=',' read -r -a IAM_USER_ARNS <<< "$IAM_USER_ARNS"
+          # Extract username (everything after last /)
+          USERNAME="${MY_ARN##*/}"
 
-          # Loop through the IAM user ARNs and update aws-auth
-          for arn in "${IAM_USER_ARNS[@]}"; do
-            echo "Adding ARN: $arn to aws-auth"
-            
-            # Print out the ARN and the extracted username for debugging
-            echo "ARN: $arn"
-            echo "Username: ${arn##*/}"
-            
-            # Get the existing ConfigMap and modify it with yq
-            kubectl get configmap aws-auth -n kube-system -o yaml -v=9 | \
-              yq eval ".data.mapUsers += \"- userarn: $arn\n  username: ${arn##*/}\n  groups:\n    - system:masters\n\"" > modified_aws_auth.yaml
+          # Get existing aws-auth ConfigMap
+          kubectl get configmap aws-auth -n kube-system -o yaml > aws-auth.yaml
 
-            # Print the modified YAML to verify changes before applying
-            echo "Modified aws-auth ConfigMap:"
-            cat modified_aws_auth.yaml
+          # Check if ARN already exists
+          if ! grep -q "$MY_ARN" aws-auth.yaml; then
+            # Append new IAM user mapping
+            yq eval ".data.mapUsers += \"- userarn: $MY_ARN\n  username: $USERNAME\n  groups:\n    - system:masters\n\"" aws-auth.yaml > modified_aws_auth.yaml
 
-            # Apply the updated ConfigMap
+            echo "✅ Adding $MY_ARN to aws-auth ConfigMap"
             kubectl apply -f modified_aws_auth.yaml
-          done
+          else
+            echo "⚡ $MY_ARN already exists in aws-auth. Skipping."
+          fi
+
+          # Verify update
+          kubectl get configmap aws-auth -n kube-system -o yaml
         env:
-          IAM_USER_ARNS: ${{ secrets.IAM_USER_ARNS }}
+          AWS_IAM_ROLE: ${{ secrets.AWS_IAM_ROLE }}
+
+      #Verify IAM role 
+      - name: Verify IAM Access
+        run: kubectl get ns 
+
+      - name: Install Helm 
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Install Prometheus and Grafana via Helm
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo update
+
+          # Prometheus
+          helm upgrade --install prometheus prometheus-community/prometheus \
+            --namespace monitoring --create-namespace
+
+          # Grafana
+          helm upgrade --install grafana grafana/grafana \
+            --namespace monitoring --create-namespace
