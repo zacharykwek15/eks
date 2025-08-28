@@ -85,7 +85,7 @@ jobs:
 
       - name: Update aws-auth ConfigMap with IAM User ARNs
         run: |
-          set -euxo pipeline    @safer debugging
+          set -euxo pipefail   @safer debugging
           # Pull the IAM ARN from GitHub Secrets
           MY_ARN="${AWS_IAM_ROLE}"
 
