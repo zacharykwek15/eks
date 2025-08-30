@@ -1,14 +1,14 @@
-name: Deploy Prometheus
+name: Verify Monitoring Stack
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger
 
 jobs:
-  deploy-monitoring:
+  verify-monitoring:
     runs-on: ubuntu-latest
     env:
       AWS_REGION: ap-southeast-1
-      CLUSTER_NAME: zh-test-dev-eks-cluster   # Need to change this to group cluster name/env
+      CLUSTER_NAME: zh-test-dev-eks-cluster  # Existing cluster
 
     steps:
       - name: Checkout repository
@@ -29,9 +29,11 @@ jobs:
       - name: Configure kubectl for EKS
         run: |
           aws eks update-kubeconfig \
-            --name $CLUSTER_NAME \
-            --region $AWS_REGION
+            --name "$CLUSTER_NAME" \
+            --region "$AWS_REGION"
 
-      - name: Deploy Monitoring Stack
-        run: |
-          kubectl apply -f monitoring/
+      - name: Verify Monitoring Pods
+        run: kubectl get pods -n monitoring
+
+      - name: Verify Services
+        run: kubectl get svc -n monitoring
