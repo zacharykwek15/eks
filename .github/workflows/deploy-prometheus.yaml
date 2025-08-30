@@ -10,9 +10,8 @@ jobs:
   deploy-monitoring:
     runs-on: ubuntu-latest
     env:
-      TF_STATE_BUCKET: sctp-ce10-tfstate
-      TF_STATE_KEY: zh-test/eks.tfstate
-      TF_REGION: ap-southeast-1
+      AWS_REGION: ap-southeast-1
+      CLUSTER_NAME: zh-test-dev-eks-cluster   # Hardcoded cluster name
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
