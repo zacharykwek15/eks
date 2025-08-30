@@ -26,12 +26,17 @@ spec:
             - containerPort: 9090
           volumeMounts:
             - name: prometheus-config-volume
-              mountPath: /etc/prometheus/
+              mountPath: /etc/prometheus/     #Config Files (know what to scrape & how to run)
+            - name: prometheus-storage
+              mountPath: /prometheus  # Where Prometheus stores metrics
       volumes:
         - name: prometheus-config-volume
           configMap:
             name: prometheus-config
-
+            
+        - name: prometheus-storage
+          persistentVolumeClaim:
+            claimName: prometheus-server-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -68,6 +73,11 @@ spec:
           image: grafana/grafana:10.1.3
           ports:
             - containerPort: 3000
+          env:    #Added this for username and pw
+            - name: GF_SECURITY_ADMIN_USER
+              value: "admin"                # set your username
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "YourSecurePassword"   # set your password
 
 apiVersion: v1
 kind: Service
@@ -81,3 +91,5 @@ spec:
   ports:
     - port: 80
       targetPort: 3000
+
+      
