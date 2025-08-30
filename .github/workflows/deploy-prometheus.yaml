@@ -38,15 +38,16 @@ jobs:
       - name: Fetch EKS cluster outputs
         id: tf-output
         run: |
-          # Fetch cluster_name safely using JSON
-          CLUSTER_NAME=$(terraform output -json cluster_name | tr -d '"')
+          # Fetch cluster_name safely using JSON and remove unwanted characters
+          CLUSTER_NAME=$(terraform output -json cluster_name | tr -d '"' | tr -d '\r' | tr -d '\n')
           
           if [ -z "$CLUSTER_NAME" ]; then
             echo "Error: cluster_name output is empty"
             exit 1
           fi
 
-          echo "CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
+          # Write safely to GITHUB_ENV
+          echo "CLUSTER_NAME=${CLUSTER_NAME}" >> $GITHUB_ENV
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
