@@ -1,17 +1,14 @@
 name: Deploy Prometheus
 
 on:
-  push:
-    branches:
-      - main
-
+  workflow_dispatch:
 
 jobs:
   deploy-monitoring:
     runs-on: ubuntu-latest
     env:
-        AWS_REGION: ap-southeast-1
-        CLUSTER_NAME: zh-test-dev-eks-cluster   #Need to change this to group variable cluster
+      AWS_REGION: ap-southeast-1
+      CLUSTER_NAME: zh-test-dev-eks-cluster   # Need to change this to group cluster name/env
 
     steps:
       - name: Checkout repository
@@ -23,32 +20,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.7.0
-
-      - name: Initialize Terraform
-        run: |
-          terraform init \
-            -backend-config="bucket=${TF_STATE_BUCKET}" \
-            -backend-config="key=${TF_STATE_KEY}" \
-            -backend-config="region=${TF_REGION}"
-
-      - name: Fetch EKS cluster outputs
-        id: tf-output
-        run: |
-          # Fetch cluster_name safely using JSON and remove unwanted characters
-          CLUSTER_NAME=$(terraform output -json cluster_name | tr -d '"' | tr -d '\r' | tr -d '\n')
-          
-          if [ -z "$CLUSTER_NAME" ]; then
-            echo "Error: cluster_name output is empty"
-            exit 1
-          fi
-
-          # Write safely to GITHUB_ENV
-          echo "CLUSTER_NAME=${CLUSTER_NAME}" >> $GITHUB_ENV
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
