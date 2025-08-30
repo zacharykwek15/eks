@@ -10,8 +10,9 @@ jobs:
   deploy-monitoring:
     runs-on: ubuntu-latest
     env:
-      AWS_REGION: ap-southeast-1
-      CLUSTER_NAME: zh-test-dev-eks-cluster   # Hardcoded cluster name
+        AWS_REGION: ap-southeast-1
+        CLUSTER_NAME: zh-test-dev-eks-cluster
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -21,7 +22,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.TF_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v2
