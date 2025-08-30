@@ -13,7 +13,7 @@ jobs:
       TF_STATE_KEY: zh-test/eks.tfstate
       TF_REGION: ap-southeast-1
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
@@ -38,8 +38,15 @@ jobs:
       - name: Fetch EKS cluster outputs
         id: tf-output
         run: |
-          CLUSTER_NAME=$(terraform output -raw cluster_name)
-          echo "CLUSTER_NAME=${CLUSTER_NAME}" >> $GITHUB_ENV
+          # Fetch cluster_name safely using JSON
+          CLUSTER_NAME=$(terraform output -json cluster_name | tr -d '"')
+          
+          if [ -z "$CLUSTER_NAME" ]; then
+            echo "Error: cluster_name output is empty"
+            exit 1
+          fi
+
+          echo "CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
