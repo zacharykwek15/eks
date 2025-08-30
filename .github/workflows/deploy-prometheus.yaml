@@ -26,6 +26,7 @@ jobs:
         with:
           version: 'v1.27.0'
 
+
       - name: Configure kubectl for EKS
         run: |
           aws eks update-kubeconfig \
