@@ -53,7 +53,7 @@ jobs:
 
       - name: Delete EBS StorageClass
         run: |
-          kubectl delete -f monitoring/gp3-immediate.yaml --ignore-not-found
+          kubectl delete -f monitoring/gp3-storageclass.yaml --ignore-not-found
 
       - name: Delete Monitoring Namespace
         run: |
