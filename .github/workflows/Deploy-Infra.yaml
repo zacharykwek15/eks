@@ -74,9 +74,7 @@ jobs:
 
       - name: Setup Kubeconfig
         run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
-
-      - name: Delete gp2 Storage Class
-        run: kubectl delete storageclass gp2
+        
         continue-on-error: true
 
 

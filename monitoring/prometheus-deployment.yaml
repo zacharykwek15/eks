@@ -46,7 +46,7 @@ metadata:
 spec:
   type: LoadBalancer   # Exposed externally
   selector:
-    app: prometheus-server
+    app: prometheus
   ports:
     - port: 9090
       targetPort: 9090
