@@ -41,4 +41,4 @@ jobs:
 
       - name: Create EBS StorageClass
         run: |
-          kubectl apply -f monitoring/gp2-sc.yaml
+          kubectl apply -f monitoring/gp3-storageclass.yaml
