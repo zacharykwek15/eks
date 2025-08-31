@@ -1,4 +1,4 @@
-name: Verify Monitoring Stack
+name: Deploy Monitoring Stack
 
 on:
   workflow_dispatch:  # Manual trigger
