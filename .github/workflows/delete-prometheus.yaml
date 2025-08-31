@@ -1,18 +1,20 @@
-name: Deploy Monitoring Stack
+name: Delete Monitoring Stack
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy monitoring'
+        description: 'Environment to remove monitoring'
         required: true
         default: 'dev'
+
 jobs:
-  verify-monitoring:
+  teardown-monitoring:
     runs-on: ubuntu-latest
     env:
       AWS_REGION: ap-southeast-1
       CLUSTER_NAME: zh-test-dev-eks-cluster  # Existing cluster
+      MONITORING_NAMESPACE: monitoring
 
     steps:
       - name: Checkout repository
@@ -30,6 +32,10 @@ jobs:
         with:
           version: 'v1.27.0'
 
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.12.0'
 
       - name: Configure kubectl for EKS
         run: |
@@ -37,12 +43,18 @@ jobs:
             --name "$CLUSTER_NAME" \
             --region "$AWS_REGION"
 
-      - name: Verify Monitoring Pods
-        run: kubectl get pods -n monitoring
-
-      - name: Verify Services
-        run: kubectl get svc -n monitoring
-
-      - name: Create EBS StorageClass
+      - name: Uninstall Prometheus
         run: |
-          kubectl apply -f monitoring/gp3-immediate.yaml
+          helm uninstall prometheus -n $MONITORING_NAMESPACE || echo "Prometheus release not found"
+
+      - name: Uninstall Grafana
+        run: |
+          helm uninstall grafana -n $MONITORING_NAMESPACE || echo "Grafana release not found"
+
+      - name: Delete EBS StorageClass
+        run: |
+          kubectl delete -f monitoring/gp3-immediate.yaml --ignore-not-found
+
+      - name: Delete Monitoring Namespace
+        run: |
+          kubectl delete namespace $MONITORING_NAMESPACE --ignore-not-found
