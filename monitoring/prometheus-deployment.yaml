@@ -41,12 +41,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: prometheus
+  name: prometheus-server
   namespace: monitoring
 spec:
   type: LoadBalancer   # Exposed externally
   selector:
-    app: prometheus
+    app: prometheus-server
   ports:
     - port: 9090
       targetPort: 9090
@@ -92,4 +92,4 @@ spec:
     - port: 80
       targetPort: 3000
 
-      
+

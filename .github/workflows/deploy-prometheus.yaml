@@ -38,3 +38,7 @@ jobs:
 
       - name: Verify Services
         run: kubectl get svc -n monitoring
+
+      - name: Create EBS StorageClass
+        run: |
+          kubectl apply -f monitoring/gp2-sc.yaml
