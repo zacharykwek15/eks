@@ -8,8 +8,8 @@ prometheus:
             - myApp
     namespaceSelector:
       matchNames:
-        - myApp-dev
-        - myApp-uat
+        - myapp-dev
+        - myapp-uat
     storageSpec:
       volumeClaimTemplate:
         spec:
