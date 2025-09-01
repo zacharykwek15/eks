@@ -62,22 +62,17 @@ jobs:
       - name: Setup Kubeconfig
         run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
 
-      - name: Create application namespace
+      - name: Ensure application namespace exists
         run: |
-          kubectl create ns $APP_NAMESPACE || echo "Namespace $APP_NAMESPACE already exists"
-
+          kubectl get ns $APP_NAMESPACE || kubectl create ns $APP_NAMESPACE
+      
+      - name: Test kubectl connection
+        run: kubectl get nodes
+      
       - name: Apply StorageClass & Monitoring Namespace
         run: |
           kubectl apply -f ./monitoring/gp3-storageclass.yaml
           kubectl apply -f ./monitoring/monitoring-namespace.yaml
-
-      - name: Create application namespace
-        run: |
-          echo "Creating namespace $APP_NAMESPACE if it doesn't exist..."
-          kubectl get ns $APP_NAMESPACE || kubectl create ns $APP_NAMESPACE
-
-      - name: Test kubectl connection
-        run: kubectl get nodes
 
       - name: Deploy Flask App
         run: |
