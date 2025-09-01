@@ -18,10 +18,8 @@ prometheus:
           resources:
             requests:
               storage: 20Gi
-
-  server:
     service:
-      type: LoadBalancer
+      type: LoadBalancer       # <-- ensures Prometheus service is a LoadBalancer
 
 grafana:
   adminUser: admin
