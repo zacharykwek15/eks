@@ -1,4 +1,4 @@
-name: Deploy Monitoring Stack
+name: Deploy Monitoring Stack (new)
 
 on:
   workflow_dispatch:
@@ -14,6 +14,7 @@ permissions:
 
 env:
   AWS_REGION: ap-southeast-1
+  CLUSTER_NAME: zh-test-dev-eks-cluster
   MONITORING_NAMESPACE: monitoring
   APP_NAMESPACE: myApp-dev      # change for UAT
   DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/flaskapp
