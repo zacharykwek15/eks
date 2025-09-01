@@ -16,7 +16,7 @@ env:
   AWS_REGION: ap-southeast-1
   MONITORING_NAMESPACE: monitoring
   APP_NAMESPACE: myApp-dev      # change for UAT
-  DOCKER_IMAGE: <your-dockerhub-username>/flaskapp
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/flaskapp
   DOCKER_TAG: dev
 
 jobs:
