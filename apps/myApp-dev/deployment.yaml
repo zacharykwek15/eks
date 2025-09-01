@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: flaskapp
-  namespace: myApp-dev   # change to myApp-uat for UAT
+  namespace: myapp-dev   # change to myApp-uat for UAT
   labels:
     app: flaskapp
 spec:
