@@ -17,9 +17,8 @@ prometheus:
           resources:
             requests:
               storage: 20Gi
-  server:
-    service:
-      type: LoadBalancer
+  service:
+    type: LoadBalancer
 
 grafana:
   adminUser: admin
