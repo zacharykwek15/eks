@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: flaskapp
-          image: your-dockerhub-username/flaskapp:latest
+          image: zacharykwek15/flaskapp:latest
           ports:
             - containerPort: 5000
           readinessProbe:

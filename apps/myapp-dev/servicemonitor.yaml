@@ -4,7 +4,7 @@ metadata:
   name: flaskapp-servicemonitor
   namespace: myapp-dev   # match deployment namespace
   labels:
-    team: myapp          # 👈 must match Prometheus serviceMonitorSelector
+    team: myApp          # 👈 must match Prometheus serviceMonitorSelector
 spec:
   selector:
     matchLabels:
