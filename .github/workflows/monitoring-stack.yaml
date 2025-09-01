@@ -1,0 +1,88 @@
+name: Deploy Monitoring Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy monitoring'
+        required: true
+        default: 'dev'
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-southeast-1
+  MONITORING_NAMESPACE: monitoring
+  APP_NAMESPACE: myApp-dev      # change for UAT
+  DOCKER_IMAGE: <your-dockerhub-username>/flaskapp
+  DOCKER_TAG: dev
+
+jobs:
+  deploy-monitoring:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t $DOCKER_IMAGE:$DOCKER_TAG ./apps/$APP_NAMESPACE
+          docker push $DOCKER_IMAGE:$DOCKER_TAG
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: github-run-id-${{ github.run_id }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.30.0'
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+
+      - name: Setup Kubeconfig
+        run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+
+      - name: Create application namespace
+        run: |
+          kubectl create ns $APP_NAMESPACE || echo "Namespace $APP_NAMESPACE already exists"
+
+      - name: Apply StorageClass & Monitoring Namespace
+        run: |
+          kubectl apply -f ./monitoring/gp3-storageclass.yaml
+          kubectl apply -f ./monitoring/monitoring-namespace.yaml
+
+      - name: Deploy Flask App
+        run: |
+          kubectl apply -f ./apps/$APP_NAMESPACE/deployment.yaml
+          kubectl apply -f ./apps/$APP_NAMESPACE/service.yaml
+          kubectl apply -f ./apps/$APP_NAMESPACE/servicemonitor.yaml
+
+      - name: Install kube-prometheus-stack
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+          helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+            --namespace $MONITORING_NAMESPACE \
+            -f ./monitoring/monitoring-values.yaml
+
+      - name: Install Loki + Promtail
+        run: kubectl apply -f ./monitoring/loki-promtail.yaml

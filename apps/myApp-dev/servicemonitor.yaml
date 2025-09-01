@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: flaskapp-servicemonitor
+  namespace: myApp-dev   # match deployment namespace
+  labels:
+    team: myApp          # 👈 must match Prometheus serviceMonitorSelector
+spec:
+  selector:
+    matchLabels:
+      app: flaskapp
+  namespaceSelector:
+    matchNames:
+      - myApp-dev        # Prometheus will only scrape this namespace
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 15s

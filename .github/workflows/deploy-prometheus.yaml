@@ -11,38 +11,34 @@ jobs:
   verify-monitoring:
     runs-on: ubuntu-latest
     env:
-      AWS_REGION: ap-southeast-1
-      CLUSTER_NAME: zh-test-dev-eks-cluster  # Existing cluster
+      MONITORING_NAMESPACE: monitoring
+      TARGET_NAMESPACES: myApp-dev,myApp-uat
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Install kubectl
+      - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.27.0'
+          version: 'v1.30.0'
 
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
 
-      - name: Configure kubectl for EKS
+      - name: Apply Namespace & StorageClass
         run: |
-          aws eks update-kubeconfig \
-            --name "$CLUSTER_NAME" \
-            --region "$AWS_REGION"
+          kubectl apply -f gp3-storageclass.yaml  #Tor wei have k8, use that
+          kubectl apply -f monitoring-namespace.yaml
 
-      - name: Verify Monitoring Pods
-        run: kubectl get pods -n monitoring
-
-      - name: Verify Services
-        run: kubectl get svc -n monitoring
-
-      - name: Create EBS StorageClass
+      - name: Install kube-prometheus-stack
         run: |
-          kubectl apply -f monitoring/gp3-storageclass.yaml
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+
+          helm upgrade --install monitoring-stack prometheus-community/kube-prometheus-stack \
+            --namespace ${{ env.MONITORING_NAMESPACE }} \
+            --create-namespace \
+            --values ./monitoring-values.yaml

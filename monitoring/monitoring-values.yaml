@@ -1,0 +1,30 @@
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelector:
+      matchExpressions:
+        - key: team
+          operator: In
+          values:
+            - myApp
+    namespaceSelector:
+      matchNames:
+        - myApp-dev
+        - myApp-uat
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3-immediate
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+
+grafana:
+  adminUser: admin
+  adminPassword: YourSecurePassword
+  persistence:
+    enabled: true
+    storageClassName: gp3-immediate
+    size: 10Gi
+  service:
+    type: LoadBalancer
