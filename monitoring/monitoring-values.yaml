@@ -9,7 +9,6 @@ prometheus:
     namespaceSelector:
       matchNames:
         - myapp-dev
-        - myapp-uat
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -18,8 +17,9 @@ prometheus:
           resources:
             requests:
               storage: 20Gi
+  server:
     service:
-      type: LoadBalancer       # <-- ensures Prometheus service is a LoadBalancer
+      type: LoadBalancer
 
 grafana:
   adminUser: admin
