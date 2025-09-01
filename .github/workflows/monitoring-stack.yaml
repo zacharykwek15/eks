@@ -71,6 +71,14 @@ jobs:
           kubectl apply -f ./monitoring/gp3-storageclass.yaml
           kubectl apply -f ./monitoring/monitoring-namespace.yaml
 
+      - name: Create application namespace
+        run: |
+          echo "Creating namespace $APP_NAMESPACE if it doesn't exist..."
+          kubectl get ns $APP_NAMESPACE || kubectl create ns $APP_NAMESPACE
+
+      - name: Test kubectl connection
+        run: kubectl get nodes
+
       - name: Deploy Flask App
         run: |
           kubectl apply -f ./apps/$APP_NAMESPACE/deployment.yaml
