@@ -1,0 +1,65 @@
+name: Delete Monitoring Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to delete monitoring'
+        required: true
+        default: 'dev'
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-southeast-1
+  CLUSTER_NAME: zh-test-dev-eks-cluster
+  MONITORING_NAMESPACE: monitoring
+  APP_NAMESPACE: myapp-dev      # change for UAT
+
+jobs:
+  delete-monitoring:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: github-run-id-${{ github.run_id }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.30.0'
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+
+      - name: Setup Kubeconfig
+        run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+
+      - name: Delete Flask App
+        run: |
+          kubectl delete -f ./apps/$APP_NAMESPACE/deployment.yaml --ignore-not-found
+          kubectl delete -f ./apps/$APP_NAMESPACE/service.yaml --ignore-not-found
+          kubectl delete -f ./apps/$APP_NAMESPACE/servicemonitor.yaml --ignore-not-found
+
+      - name: Delete Loki + Promtail
+        run: |
+          kubectl delete -f ./monitoring/loki-promtail.yaml --ignore-not-found
+
+      - name: Delete kube-prometheus-stack
+        run: |
+          helm uninstall kube-prometheus-stack --namespace $MONITORING_NAMESPACE || echo "Helm release not found"
+
+      - name: Delete Monitoring Namespace
+        run: |
+          kubectl delete ns $MONITORING_NAMESPACE --ignore-not-found

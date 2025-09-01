@@ -19,6 +19,10 @@ prometheus:
             requests:
               storage: 20Gi
 
+  server:
+    service:
+      type: LoadBalancer
+
 grafana:
   adminUser: admin
   adminPassword: YourSecurePassword
