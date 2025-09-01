@@ -38,6 +38,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
+        working-directory: ${{ github.workspace }}   # ensures repo root
         run: |
           docker build -t $DOCKER_IMAGE:$DOCKER_TAG ./apps/$APP_NAMESPACE
           docker push $DOCKER_IMAGE:$DOCKER_TAG
