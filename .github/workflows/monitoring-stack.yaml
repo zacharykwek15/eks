@@ -75,12 +75,6 @@ jobs:
           kubectl apply -f ./monitoring/gp3-storageclass.yaml
           kubectl apply -f ./monitoring/monitoring-namespace.yaml
 
-      - name: Deploy Flask App
-        run: |
-          kubectl apply -f ./apps/$APP_NAMESPACE/deployment.yaml
-          kubectl apply -f ./apps/$APP_NAMESPACE/service.yaml
-          kubectl apply -f ./apps/$APP_NAMESPACE/servicemonitor.yaml
-
       - name: Install kube-prometheus-stack
         run: |
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -88,6 +82,12 @@ jobs:
           helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
             --namespace $MONITORING_NAMESPACE \
             -f ./monitoring/monitoring-values.yaml
+
+      - name: Deploy Flask App
+        run: |
+          kubectl apply -f ./apps/$APP_NAMESPACE/deployment.yaml
+          kubectl apply -f ./apps/$APP_NAMESPACE/service.yaml
+          kubectl apply -f ./apps/$APP_NAMESPACE/servicemonitor.yaml
 
       - name: Install Loki + Promtail
         run: kubectl apply -f ./monitoring/loki-promtail.yaml
