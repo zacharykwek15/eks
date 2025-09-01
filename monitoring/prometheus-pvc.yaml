@@ -9,4 +9,4 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: gp3-storageclass
+  storageClassName: gp3-immediate  #Need to align this with tor wei's k8 storage class

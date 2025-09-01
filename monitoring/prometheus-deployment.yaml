@@ -37,7 +37,23 @@ spec:
         - name: prometheus-storage
           persistentVolumeClaim:
             claimName: prometheus-server
+
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-server
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi          # adjust as needed
+  storageClassName: gp3-immediate   # ensure binding happens immediately
+
+---
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -95,7 +111,7 @@ metadata:
   name: grafana
   namespace: monitoring
 spec:
-  type: LoadBalancer   # Exposed externally
+  type: LoadBalancer  
   selector:
     app.kubernetes.io/instance: grafana
     app.kubernetes.io/name: grafana
@@ -115,4 +131,19 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: gp3
+  storageClassName: gp3-immediate
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: loki-storage
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: gp3-immediate
