@@ -1,4 +1,4 @@
-name: Delete Monitoring Stack
+name: Delete Monitoring Stack (New)
 
 on:
   workflow_dispatch:
