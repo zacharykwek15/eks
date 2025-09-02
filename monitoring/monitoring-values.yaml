@@ -9,6 +9,8 @@ prometheus:
     namespaceSelector:
       matchNames:
         - myapp-dev
+        - monitoring
+        - kube-system
     storageSpec:
       volumeClaimTemplate:
         spec:
