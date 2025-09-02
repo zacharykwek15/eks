@@ -26,6 +26,13 @@ prometheus:
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
       service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /
 
+prometheusNodeExporter:
+  serviceMonitor:
+    enabled: true
+    labels:
+      team: myApp   # <- Add this label so Prometheus discovers Node Exporter
+
+
 grafana:
   adminUser: admin
   adminPassword: YourSecurePassword
