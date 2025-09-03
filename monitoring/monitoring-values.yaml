@@ -27,11 +27,11 @@ prometheus:
       service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /
 
 prometheusNodeExporter:
+  enabled: true         
   serviceMonitor:
     enabled: true
     labels:
-      team: myApp   # <- Add this label so Prometheus discovers Node Exporter
-
+      team: myApp        # <--- matches Prometheus serviceMonitorSelector
 
 grafana:
   adminUser: admin
@@ -42,3 +42,5 @@ grafana:
     size: 10Gi
   service:
     type: LoadBalancer
+
+    
