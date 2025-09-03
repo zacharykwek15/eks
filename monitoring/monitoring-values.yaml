@@ -26,12 +26,13 @@ prometheus:
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
       service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /
 
-prometheusNodeExporter:
-  enabled: true         
-  serviceMonitor:
-    enabled: true
-    labels:
-      team: myApp        # <--- matches Prometheus serviceMonitorSelector
+prometheus-node-exporter:
+  enabled: true
+  prometheus:
+    monitor:
+      enabled: true
+      additionalLabels:
+        team: myApp
 
 grafana:
   adminUser: admin
@@ -42,5 +43,3 @@ grafana:
     size: 10Gi
   service:
     type: LoadBalancer
-
-    
