@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
@@ -36,12 +36,22 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: Destroy EKS
-        working-directory: ./eks
+      - name: Capture VPC Outputs
+        working-directory: ./vpc
+        id: vpc_outputs
         run: |
           terraform init
           terraform workspace select -or-create ${{ github.event.inputs.environment }}
-          terraform workspace list
+          terraform output -raw vpc_id > vpc_id.txt
+          echo "VPC_ID=$(cat vpc_id.txt)" >> $GITHUB_ENV
+
+      - name: Destroy EKS
+        working-directory: ./eks
+        env:
+          TF_VAR_vpc_id: ${{ env.VPC_ID }}
+        run: |
+          terraform init
+          terraform workspace select -or-create ${{ github.event.inputs.environment }}
           terraform validate
           terraform destroy -var-file=${{ github.event.inputs.environment }}.tfvars --auto-approve
 
@@ -50,6 +60,5 @@ jobs:
         run: |
           terraform init
           terraform workspace select -or-create ${{ github.event.inputs.environment }}
-          terraform workspace list
           terraform validate
           terraform destroy -var-file=${{ github.event.inputs.environment }}.tfvars --auto-approve
